@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategic Decision Analysis Tool</title>
+  <style>
+    :root {
+      --primary: #2c5aa0;
+      --primary-light: #4a7bc8;
+      --primary-dark: #1e3d6f;
+      --secondary: #34495e;
+      --bg-light: #f8f9fa;
+      --bg-white: #ffffff;
+      --text-primary: #2c3e50;
+      --text-secondary: #5a6c7d;
+      --border: #e1e8ed;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --shadow-hover: 0 4px 20px rgba(0,0,0,0.12);
+      --success-bg: #d1f2eb;
+      --success-text: #0c5460;
+      --error-bg: #fadbd8;
+      --error-text: #922b21;
+      --warning-bg: #fdf2e9;
+      --warning-text: #d68910;
+      --accent-blue: #3498db;
+      --accent-green: #27ae60;
+      --accent-orange: #f39c12;
+      --accent-red: #e74c3c;
+      --accent-purple: #9b59b6;
+    }
+    
+    [data-theme="dark"] {
+      --bg-light: #1a1a1a;
+      --bg-white: #2d2d2d;
+      --text-primary: #e8e8e8;
+      --text-secondary: #b0b0b0;
+      --border: #404040;
+      --shadow: 0 2px 12px rgba(0,0,0,0.3);
+      --shadow-hover: 0 4px 20px rgba(0,0,0,0.4);
+      --success-bg: #1b4332;
+      --success-text: #74c69d;
+      --error-bg: #4a1c1c;
+      --error-text: #ff8a80;
+      --warning-bg: #3d2914;
+      --warning-text: #f5b041;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: all 0.3s ease;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 2rem 0;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .header .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      font-weight: 300;
+    }
+
+    #darkModeToggle {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.5rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    #darkModeToggle:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.1);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .explanation-box {
+      background: var(--bg-white);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary);
+    }
+
+    .explanation-box h3 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .explanation-box p {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .example-highlight {
+      background: var(--success-bg);
+      color: var(--success-text);
+      padding: 1rem;
+      border-radius: 6px;
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
+
+    .analysis-tabs {
+      display: flex;
+      background: var(--bg-white);
+      border-radius: 12px 12px 0 0;
+      box-shadow: var(--shadow);
+      margin-bottom: 0;
+      overflow-x: auto;
+    }
+
+    .tab-button {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      min-width: 120px;
+    }
+
+    .tab-button.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: var(--bg-light);
+    }
+
+    .tab-button:hover:not(.active) {
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .main-content {
+      background: var(--bg-white);
+      border-radius: 0 0 12px 12px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .choice-card {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .choice-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .choice-card .remove-choice {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--accent-red);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.2rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .choice-card .remove-choice:hover {
+      background: rgba(231, 76, 60, 0.1);
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .help-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      font-style: italic;
+    }
+
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      background: var(--bg-white);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+    }
+
+    .example-input {
+      color: var(--text-secondary) !important;
+      font-style: italic;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+    }
+
+    .outcome-row {
+      display: grid;
+      grid-template-columns: 2fr 100px 100px 100px 40px;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-white);
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .outcome-row:hover {
+      border-color: var(--border);
+    }
+
+    .outcome-row .remove-outcome {
+      background: none;
+      border: none;
+      color: var(--accent-red);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .outcome-row .remove-outcome:hover {
+      background: rgba(231, 76, 60, 0.1);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+    }
+
+    .btn-secondary:hover {
+      background: #2c3e50;
+    }
+
+    .btn-success {
+      background: var(--accent-green);
+    }
+
+    .btn-success:hover {
+      background: #229954;
+    }
+
+    .btn-warning {
+      background: var(--accent-orange);
+    }
+
+    .btn-warning:hover {
+      background: #e67e22;
+    }
+
+    #analyzeBtn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      margin-top: 2rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .risk-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .risk-low {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .risk-medium {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .risk-high {
+      background: var(--error-bg);
+      color: var(--error-text);
+    }
+
+    .results-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .results-overlay.visible {
+      display: flex;
+      opacity: 1;
+    }
+
+    .results-modal {
+      background: var(--bg-white);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 95vw;
+      max-height: 95vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      position: relative;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      width: 1000px;
+    }
+
+    .results-overlay.visible .results-modal {
+      transform: scale(1);
+    }
+
+    .close-results {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .close-results:hover {
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .result-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .result-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .result-summary {
+      background: var(--success-bg);
+      color: var(--success-text);
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-container {
+      background: var(--bg-light);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .chart-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    .results-table {
+      background: var(--bg-white);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .results-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .results-table th,
+    .results-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .results-table th {
+      background: var(--bg-light);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .insights-section {
+      background: var(--bg-light);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .insight-card {
+      background: var(--bg-white);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid var(--primary);
+    }
+
+    .insight-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .export-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .analysis-results {
+      margin-top: 2rem;
+    }
+
+    .results-card {
+      background: var(--bg-light);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .main-content {
+        padding: 1.5rem;
+      }
+      
+      .outcome-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+      
+      .outcome-row input,
+      .outcome-row select {
+        margin-bottom: 0.5rem;
+      }
+      
+      .results-modal {
+        padding: 1.5rem;
+        width: 95vw;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+
+      .analysis-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-button {
+        font-size: 0.9rem;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <button id="darkModeToggle" title="Toggle theme">◐</button>
+  
+  <div class="header">
+    <h1>Strategic Decision Analysis Tool</h1>
+    <p class="subtitle">
+      Make better decisions by comparing options using three powerful but simple methods: 
+      Expected Value (find the best option), Risk Assessment (understand uncertainty), 
+      and Sensitivity Analysis (test your assumptions).
+    </p>
+  </div>
+
+  <div class="container">
+    <div class="analysis-tabs">
+      <button class="tab-button active" data-tab="setup">Setup Options</button>
+      <button class="tab-button" data-tab="expected-value">Expected Value</button>
+      <button class="tab-button" data-tab="risk">Risk Assessment</button>
+      <button class="tab-button" data-tab="sensitivity">Sensitivity Test</button>
+    </div>
+
+    <div class="main-content">
+      <!-- Setup Tab -->
+      <div id="setup" class="tab-content active">
+        <div class="section-title">Setup Your Decision</div>
+        
+        <div class="explanation-box">
+          <h3>How This Works</h3>
+          <p>This tool helps you make better decisions by analyzing your options in three ways:</p>
+          <p><strong>1. Expected Value:</strong> Calculates which option is likely to give the best results on average</p>
+          <p><strong>2. Risk Assessment:</strong> Shows which options are "safe bets" vs "high-risk, high-reward"</p>
+          <p><strong>3. Sensitivity Analysis:</strong> Tests which of your assumptions matter most to the final decision</p>
+          <div class="example-highlight">
+            💡 Example: Choosing between a social media campaign (predictable, lower impact) vs. a legal challenge (uncertain, but could create major change)
+          </div>
+        </div>
+        
+        <div id="choicesList"></div>
+        
+        <div class="actions">
+          <button id="addChoiceBtn" class="btn btn-secondary">➕ Add Option</button>
+          <button id="exampleBtn" class="btn btn-warning">📝 Load Example</button>
+        </div>
+        
+        <button id="analyzeBtn" class="btn">🚀 Analyze My Options</button>
+      </div>
+
+      <!-- Expected Value Tab -->
+      <div id="expected-value" class="tab-content">
+        <div class="section-title">Expected Value Analysis</div>
+        
+        <div class="explanation-box">
+          <h3>What is Expected Value?</h3>
+          <p>Expected Value calculates the "average" outcome you can expect from each option, considering both the impact and likelihood of different results.</p>
+          <p><strong>Formula:</strong> Impact × Probability × Importance, added up for all possible outcomes</p>
+          <div class="example-highlight">
+            💡 Real Example: A petition might have 80% chance of getting 1,000 signatures (impact: 4/10, importance: 6/10) and 20% chance of going viral (impact: 9/10, importance: 8/10). Expected Value = (4×0.8×6) + (9×0.2×8) = 33.6
+          </div>
+        </div>
+        
+        <div id="expectedValueResults" class="analysis-results">
+          <p>Add your options in the "Setup Options" tab first, then return here to see the results.</p>
+        </div>
+      </div>
+
+      <!-- Risk Assessment Tab -->
+      <div id="risk" class="tab-content">
+        <div class="section-title">Risk Assessment</div>
+        
+        <div class="explanation-box">
+          <h3>What is Risk Assessment?</h3>
+          <p>Risk assessment measures how much uncertainty each option has. Some strategies are predictable (low risk), others could succeed greatly or fail completely (high risk).</p>
+          <p><strong>Why it matters:</strong> If you have limited resources, you might prefer a "safe bet" over a gamble, even if the gamble has higher expected value.</p>
+          <div class="example-highlight">
+            💡 Real Example: Organizing a peaceful protest (predictable turnout, medium impact) vs. filing a lawsuit (could win big or lose everything). Both might have similar expected values, but very different risk levels.
+          </div>
+        </div>
+        
+        <div id="riskResults" class="analysis-results">
+          <p>Add your options in the "Setup Options" tab first, then return here to see the risk analysis.</p>
+        </div>
+      </div>
+
+      <!-- Sensitivity Analysis Tab -->
+      <div id="sensitivity" class="tab-content">
+        <div class="section-title">Sensitivity Analysis</div>
+        
+        <div class="explanation-box">
+          <h3>What is Sensitivity Analysis?</h3>
+          <p>Sensitivity analysis tests "what if your estimates are wrong?" It shows which assumptions are most critical to your decision.</p>
+          <p><strong>Why it matters:</strong> If a small change in one assumption completely flips your decision, you should research that factor more carefully before proceeding.</p>
+          <div class="example-highlight">
+            💡 Real Example: Your legal strategy looks best assuming 60% chance of success. But if that chance is actually 40%, does it become the worst option? If so, you should get a second legal opinion before deciding.
+          </div>
+        </div>
+        
+        <div id="sensitivityResults" class="analysis-results">
+          <p>Add your options in the "Setup Options" tab first, then return here to see which assumptions matter most.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultsOverlay" class="results-overlay">
+    <div class="results-modal">
+      <button class="close-results" onclick="closeResults()">×</button>
+      
+      <div class="result-header">
+        <div class="result-title">Analysis Results</div>
+        <div id="resultSummary" class="result-summary"></div>
+      </div>
+      
+      <div class="analysis-grid">
+        <div class="chart-container">
+          <div class="chart-title">Expected Value Comparison</div>
+          <div class="chart-wrapper">
+            <canvas id="resultChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <div class="chart-title">Risk vs Return</div>
+          <div class="chart-wrapper">
+            <canvas id="riskChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-table">
+        <h3 style="padding: 1rem;">Sensitivity Analysis: What If Your Estimates Are Wrong?</h3>
+        <table id="sensitivityTable">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Current Estimate</th>
+              <th>If 25% Better</th>
+              <th>If 25% Worse</th>
+              <th>How Sensitive?</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="insights-section">
+        <h3>Key Insights & Recommendations</h3>
+        <div id="insightsList">
+          <!-- Insights will be populated here -->
+        </div>
+      </div>
+      
+      <div class="export-actions">
+        <button id="copyBtn" class="btn btn-secondary">📋 Copy Results</button>
+        <button id="downloadBtn" class="btn btn-success">💾 Download Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  
+  <script>
+    // Global variables
+    let choiceCount = 0;
+    let analysisData = null;
+    let charts = {};
+
+    // Dark mode toggle
+    const darkToggle = document.getElementById('darkModeToggle');
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        darkToggle.textContent = '☀';
+      } else {
+        document.body.removeAttribute('data-theme');
+        darkToggle.textContent = '◐';
+      }
+    }
+    darkToggle.onclick = () => setTheme(document.body.hasAttribute('data-theme') ? 'light' : 'dark');
+
+    // Tab management
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const tabId = button.dataset.tab;
+        
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+
+        // Update tab content with analysis results if available
+        if (analysisData && tabId !== 'setup') {
+          updateTabContent(tabId);
+        }
+      });
+    });
+
+    // Example data
+    const examples = [
+      {
+        name: 'Social Media Campaign',
+        outcomes: [
+          ['Raise Public Awareness', 6, 0.8, 7],
+          ['Attract New Supporters', 5, 0.7, 6],
+          ['Get Media Coverage', 7, 0.4, 8],
+          ['Influence Policy Makers', 4, 0.3, 9]
+        ]
+      },
+      {
+        name: 'Legal Action',
+        outcomes: [
+          ['Win Court Case', 9, 0.4, 10],
+          ['Set Legal Precedent', 8, 0.3, 9],
+          ['Generate Media Attention', 7, 0.6, 7],
+          ['Drain Resources if Lost', 2, 0.6, 8]
+        ]
+      },
+      {
+        name: 'Community Organizing',
+        outcomes: [
+          ['Build Local Support', 7, 0.9, 8],
+          ['Train New Activists', 6, 0.8, 7],
+          ['Create Sustainable Network', 8, 0.7, 9],
+          ['Direct Policy Impact', 5, 0.5, 8]
+        ]
+      }
+    ];
+
+    // DOM Elements
+    const choicesList = document.getElementById('choicesList');
+    const addChoiceBtn = document.getElementById('addChoiceBtn');
+    const exampleBtn = document.getElementById('exampleBtn');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    // Create outcome row
+    function createOutcomeRow(choiceIdx, outIdx, description = '', impact = '', probability = '', importance = '') {
+      const row = document.createElement('div');
+      row.className = 'outcome-row fade-in';
+      
+      // Use examples if available
+      if (choiceIdx < examples.length && outIdx < examples[choiceIdx].outcomes.length) {
+        const example = examples[choiceIdx].outcomes[outIdx];
+        [description, impact, probability, importance] = example;
+        probability = probability.toString();
+        impact = impact.toString();
+        importance = importance.toString();
+      }
+      
+      row.innerHTML = `
+        <input type="text" placeholder="What might happen?" value="${description}">
+        <input type="number" placeholder="1-10" value="${impact}" min="1" max="10" title="How big is the impact? (1=small, 10=huge)">
+        <input type="number" placeholder="0-1" value="${probability}" min="0" max="1" step="0.1" title="How likely is this? (0=never, 1=certain)">
+        <input type="number" placeholder="1-10" value="${importance}" min="1" max="10" title="How important is this outcome? (1=not important, 10=critical)">
+        <button class="remove-outcome" onclick="removeOutcome(this)" title="Remove this outcome">×</button>
+      `;
+      
+      return row;
+    }
+
+    // Create choice card
+    function createChoiceCard(index = null) {
+      const choiceIdx = index !== null ? index : choiceCount++;
+      const card = document.createElement('div');
+      card.className = 'choice-card fade-in';
+      card.dataset.choiceIndex = choiceIdx;
+      
+      let exampleName = '';
+      if (choiceIdx < examples.length) {
+        exampleName = examples[choiceIdx].name;
+      }
+      
+      card.innerHTML = `
+        <button class="remove-choice" onclick="removeChoice(this)" title="Remove this option">×</button>
+        <label>Option Name</label>
+        <input type="text" placeholder="e.g. Social Media Campaign" value="${exampleName}" class="choice-name">
+        <div class="help-text">List possible outcomes for this option:</div>
+        <div style="background: var(--bg-light); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+          <strong>For each outcome, enter 3 numbers:</strong><br>
+          • <strong>Impact (-10 to +10):</strong> How big is the effect? Use positive for good outcomes (1-10), negative for bad outcomes (-10 to -1)<br>
+          • <strong>Probability (0-1):</strong> How likely is this? (0=never happens, 1=always happens)<br>
+          • <strong>Importance (1-10):</strong> How much do you care about this outcome? (1=not important, 10=critical)<br>
+          <em>💡 Example: "Lose lawsuit" might be Impact: -8, Probability: 0.3, Importance: 9</em>
+        </div>
+        <div class="outcomes-list"></div>
+        <button class="btn btn-secondary btn-sm" type="button" onclick="addOutcome(this)">➕ Add Outcome</button>
+      `;
+
+      // Default: add 2 example rows if available, else blank
+      const outcomesList = card.querySelector('.outcomes-list');
+      let numOutcomes = 2;
+      if (choiceIdx < examples.length) numOutcomes = examples[choiceIdx].outcomes.length;
+      for (let i = 0; i < numOutcomes; i++) {
+        outcomesList.appendChild(createOutcomeRow(choiceIdx, i));
+      }
+      return card;
+    }
+
+    // Add a new choice card to the list
+    function addChoice(index = null) {
+      choicesList.appendChild(createChoiceCard(index));
+      choiceCount = document.querySelectorAll('.choice-card').length;
+    }
+
+    // Remove a choice card
+    window.removeChoice = function(btn) {
+      btn.closest('.choice-card').remove();
+      choiceCount = document.querySelectorAll('.choice-card').length;
+    };
+
+    // Add a new outcome row to a choice
+    window.addOutcome = function(btn) {
+      const card = btn.closest('.choice-card');
+      const index = Array.from(choicesList.children).indexOf(card);
+      const outcomesList = card.querySelector('.outcomes-list');
+      outcomesList.appendChild(createOutcomeRow(index, outcomesList.children.length));
+    };
+
+    // Remove an outcome row
+    window.removeOutcome = function(btn) {
+      btn.closest('.outcome-row').remove();
+    };
+
+    // Load example data
+    exampleBtn.onclick = function() {
+      choicesList.innerHTML = '';
+      for (let i = 0; i < examples.length; i++) {
+        addChoice(i);
+      }
+    };
+
+    // Add initial choice card
+    addChoice();
+
+    // Add new choice on button click
+    addChoiceBtn.onclick = function() {
+      addChoice();
+    };
+
+    // Gather input data from the UI
+    function getAnalysisInput() {
+      const cards = document.querySelectorAll('.choice-card');
+      const choices = [];
+      for (let card of cards) {
+        const name = card.querySelector('.choice-name').value || 'Untitled Option';
+        const outcomes = [];
+        const rows = card.querySelectorAll('.outcome-row');
+        for (let row of rows) {
+          const [desc, impact, prob, imp] = Array.from(row.querySelectorAll('input')).map(i => i.value);
+          if (!desc || !impact || !prob || !imp) continue;
+          outcomes.push({
+            description: desc,
+            impact: parseFloat(impact),
+            probability: parseFloat(prob),
+            importance: parseFloat(imp)
+          });
+        }
+        if (outcomes.length) choices.push({ name, outcomes });
+      }
+      return choices;
+    }
+
+    // Calculate expected value, risk, and sensitivity
+    function analyzeChoices(choices) {
+      const results = choices.map(choice => {
+        let expectedValue = 0;
+        let variance = 0;
+        let mean = 0;
+        let sumWeights = 0;
+        let outcomeValues = [];
+        for (let o of choice.outcomes) {
+          const val = o.impact * o.probability * o.importance;
+          outcomeValues.push(val);
+          expectedValue += val;
+          sumWeights += 1;
+        }
+        mean = expectedValue / (sumWeights || 1);
+        for (let v of outcomeValues) {
+          variance += Math.pow(v - mean, 2);
+        }
+        variance = variance / (outcomeValues.length || 1);
+
+        // Sensitivity: recalc if outcomes are 25% better/worse
+        let plus = 0, minus = 0;
+        for (let o of choice.outcomes) {
+          plus += 1.25 * o.impact * o.probability * o.importance;
+          minus += 0.75 * o.impact * o.probability * o.importance;
+        }
+        let sensitivity = Math.abs(plus - minus);
+
+        return {
+          name: choice.name,
+          expectedValue: expectedValue,
+          risk: Math.sqrt(variance),
+          sensitivity: sensitivity,
+          plus, minus,
+          current: expectedValue
+        };
+      });
+      return results;
+    }
+
+    // Display results in overlay
+    function showResults(results) {
+      document.getElementById('resultsOverlay').classList.add('visible');
+      // Summary
+      let best = results.reduce((a, b) => (a.expectedValue > b.expectedValue ? a : b), results[0]);
+      document.getElementById('resultSummary').textContent =
+        `Best option: ${best.name} (Expected Value: ${best.expectedValue.toFixed(2)})`;
+
+      // Chart: Expected Value
+      if (charts.resultChart) charts.resultChart.destroy();
+      const ctx = document.getElementById('resultChart').getContext('2d');
+      charts.resultChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: results.map(r => r.name),
+          datasets: [{
+            label: 'Expected Value',
+            data: results.map(r => r.expectedValue),
+            backgroundColor: '#4a7bc8'
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      // Chart: Risk vs Return
+      if (charts.riskChart) charts.riskChart.destroy();
+      const ctx2 = document.getElementById('riskChart').getContext('2d');
+      charts.riskChart = new Chart(ctx2, {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: 'Options',
+            data: results.map(r => ({ x: r.risk, y: r.expectedValue, label: r.name })),
+            backgroundColor: '#f39c12'
+          }]
+        },
+        options: {
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const d = context.raw;
+                  return `${d.label}\nRisk: ${d.x.toFixed(2)}, Value: ${d.y.toFixed(2)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Risk (Std Dev)' }, beginAtZero: true },
+            y: { title: { display: true, text: 'Expected Value' }, beginAtZero: true }
+          }
+        }
+      });
+
+      // Sensitivity Table
+      const tbody = document.getElementById('sensitivityTable').querySelector('tbody');
+      tbody.innerHTML = '';
+      for (let res of results) {
+        let sens = res.sensitivity > res.current * 0.4 ? 'High' : res.sensitivity > res.current * 0.2 ? 'Medium' : 'Low';
+        let badge = sens === 'High' ? 'risk-high' : sens === 'Medium' ? 'risk-medium' : 'risk-low';
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${res.name}</td>
+          <td>${res.current.toFixed(2)}</td>
+          <td>${res.plus.toFixed(2)}</td>
+          <td>${res.minus.toFixed(2)}</td>
+          <td><span class="risk-indicator ${badge}">${sens}</span></td>
+        `;
+        tbody.appendChild(row);
+      }
+
+      // Insights
+      const insights = [];
+      const sorted = [...results].sort((a, b) => b.expectedValue - a.expectedValue);
+      insights.push(`• <b>Best expected value:</b> <b>${sorted[0].name}</b>`);
+      const lowestRisk = results.reduce((a, b) => (a.risk < b.risk ? a : b), results[0]);
+      insights.push(`• <b>Lowest risk:</b> <b>${lowestRisk.name}</b>`);
+      const mostSensitive = results.reduce((a, b) => (a.sensitivity > b.sensitivity ? a : b), results[0]);
+      insights.push(`• <b>Most sensitive to assumptions:</b> <b>${mostSensitive.name}</b>`);
+      document.getElementById('insightsList').innerHTML = insights.map(i => `<div class="insight-card">${i}</div>`).join('');
+    }
+
+    // Close overlay
+    window.closeResults = function() {
+      document.getElementById('resultsOverlay').classList.remove('visible');
+    };
+
+    // Run the analysis
+    analyzeBtn.onclick = function() {
+      const choices = getAnalysisInput();
+      if (choices.length < 2) {
+        alert('Please enter at least two options, each with at least one outcome.');
+        return;
+      }
+      analysisData = analyzeChoices(choices);
+      showResults(analysisData);
+      updateTabContent('expected-value');
+      updateTabContent('risk');
+      updateTabContent('sensitivity');
+    };
+
+    // Update tab content with analysis
+    function updateTabContent(tabId) {
+      if (!analysisData) return;
+      if (tabId === 'expected-value') {
+        document.getElementById('expectedValueResults').innerHTML =
+          analysisData.map(r =>
+            `<div class="results-card"><b>${r.name}</b>: <span style="color:var(--primary);font-weight:600">${r.expectedValue.toFixed(2)}</span></div>`
+          ).join('');
+      } else if (tabId === 'risk') {
+        document.getElementById('riskResults').innerHTML =
+          analysisData.map(r =>
+            `<div class="results-card"><b>${r.name}</b>: <span class="risk-indicator ${r.risk > 8 ? 'risk-high' : r.risk > 4 ? 'risk-medium' : 'risk-low'}">
+            Risk: ${r.risk.toFixed(2)}</span></div>`
+          ).join('');
+      } else if (tabId === 'sensitivity') {
+        document.getElementById('sensitivityResults').innerHTML =
+          analysisData.map(r =>
+            `<div class="results-card"><b>${r.name}</b>: Sensitivity <span style="font-weight:600">${r.sensitivity.toFixed(2)}</span> (${r.sensitivity > r.current * 0.4 ? 'High' : r.sensitivity > r.current * 0.2 ? 'Medium' : 'Low'})</div>`
+          ).join('');
+      }
+    }
+
+    // Copy report
+    document.getElementById('copyBtn').onclick = function() {
+      let txt = 'Decision Analysis Results:\n';
+      analysisData.forEach(r => {
+        txt += `Option: ${r.name}\n  Expected Value: ${r.expectedValue.toFixed(2)}\n  Risk: ${r.risk.toFixed(2)}\n  Sensitivity: ${r.sensitivity.toFixed(2)}\n\n`;
+      });
+      navigator.clipboard.writeText(txt);
+      alert('Results copied to clipboard!');
+    };
+
+    // Download report
+    document.getElementById('downloadBtn').onclick = function() {
+      let txt = 'Decision Analysis Results\n\n';
+      analysisData.forEach(r => {
+        txt += `Option: ${r.name}\n  Expected Value: ${r.expectedValue.toFixed(2)}\n  Risk: ${r.risk.toFixed(2)}\n  Sensitivity: ${r.sensitivity.toFixed(2)}\n\n`;
+      });
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'decision-analysis.txt';
+      a.click();
+    };
+
+  </script>
+</body>
+</html>
